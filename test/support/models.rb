@@ -22,6 +22,16 @@ class AnimalBioUploader < CarrierWave::Uploader::Base
   end
 end
 
+class CatBioUploader < CarrierWave::Uploader::Base
+  def store_dir
+    "uploads/#{model.class.to_s.underscore}/#{mounted_as}/#{model.id}"
+  end
+
+  def move_to_store
+    true
+  end
+end
+
 class User < ActiveRecord::Base
   mount_uploader :bio, UserBioUploader
 
@@ -33,4 +43,14 @@ end
 
 class Animal < ActiveRecord::Base
   mount_uploader :bio, AnimalBioUploader
+end
+
+class Cat < ActiveRecord::Base
+  self.table_name = "animals"
+  mount_uploader :bio, CatBioUploader
+
+  validates :legacy_code, :allow_nil => true, :format => {
+    :with => /\A[a-zA-Z]+\z/,
+    :message => "only allows letters",
+  }
 end

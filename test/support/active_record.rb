@@ -27,6 +27,7 @@ end
 
 ActiveRecord::Base.connection.create_table :animals, :force => true do |t|
   t.column :bio, :string
+  t.column :legacy_code, :string
   t.timestamps(:null => false)
 end
 

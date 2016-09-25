@@ -74,6 +74,47 @@ class CarrierWave::PostgresqlTableTest < Minitest::Test
     assert_equal("text/plain", user.bio.content_type)
   end
 
+  def test_update
+    user = User.create(:bio => File.new(File.join(TEST_ROOT, "fixtures/hello.txt")))
+    assert_equal("Hello, World.\n\n", user.bio.read)
+    assert_equal(15, user.bio.size)
+
+    assert_equal(1, User.count)
+    assert_equal(1, User.connection.select_value("SELECT COUNT(*) FROM carrierwave_files").to_i)
+    assert_equal(1, User.connection.select_value("SELECT COUNT(*) FROM pg_largeobject").to_i)
+
+    user = User.find(user.id)
+    user.bio = File.new(File.join(TEST_ROOT, "fixtures/alternate/hello.txt"))
+    user.save!
+    assert_equal("Goodbye.\n", user.bio.read)
+    assert_equal(9, user.bio.size)
+
+    assert_equal(1, User.count)
+    assert_equal(1, User.connection.select_value("SELECT COUNT(*) FROM carrierwave_files").to_i)
+    assert_equal(1, User.connection.select_value("SELECT COUNT(*) FROM pg_largeobject").to_i)
+  end
+
+  def test_update_move_to
+    cat = Cat.create(:bio => File.new(File.join(TEST_ROOT, "fixtures/hello.txt")))
+
+    assert_equal("Hello, World.\n\n", cat.bio.read)
+    assert_equal(15, cat.bio.size)
+
+    assert_equal(1, Cat.count)
+    assert_equal(1, Cat.connection.select_value("SELECT COUNT(*) FROM carrierwave_files").to_i)
+    assert_equal(1, Cat.connection.select_value("SELECT COUNT(*) FROM pg_largeobject").to_i)
+
+    cat = Cat.find(cat.id)
+    cat.bio = File.new(File.join(TEST_ROOT, "fixtures/alternate/hello.txt"))
+    cat.save!
+    assert_equal("Goodbye.\n", cat.bio.read)
+    assert_equal(9, cat.bio.size)
+
+    assert_equal(1, Cat.count)
+    assert_equal(1, Cat.connection.select_value("SELECT COUNT(*) FROM carrierwave_files").to_i)
+    assert_equal(1, Cat.connection.select_value("SELECT COUNT(*) FROM pg_largeobject").to_i)
+  end
+
   if(CarrierWave::VERSION.to_f >= 1.0)
     def test_cache
       user = User.create(:bio => File.new(File.join(TEST_ROOT, "fixtures/hello.txt")), :legacy_code => "1nval1d!")
@@ -81,6 +122,36 @@ class CarrierWave::PostgresqlTableTest < Minitest::Test
       assert_equal(0, User.count)
       assert_equal(1, User.connection.select_value("SELECT COUNT(*) FROM carrierwave_files").to_i)
       assert_equal(1, User.connection.select_value("SELECT COUNT(*) FROM pg_largeobject").to_i)
+    end
+
+    def test_cache_resave
+      user = User.create(:bio => File.new(File.join(TEST_ROOT, "fixtures/hello.txt")), :legacy_code => "1nval1d!")
+      refute(user.valid?)
+      assert_equal(0, User.count)
+      assert_equal(1, User.connection.select_value("SELECT COUNT(*) FROM carrierwave_files").to_i)
+      assert_equal(1, User.connection.select_value("SELECT COUNT(*) FROM pg_largeobject").to_i)
+
+      user.legacy_code = "abc"
+      assert(user.valid?)
+      user.save!
+      assert_equal(1, User.count)
+      assert_equal(1, User.connection.select_value("SELECT COUNT(*) FROM carrierwave_files").to_i)
+      assert_equal(1, User.connection.select_value("SELECT COUNT(*) FROM pg_largeobject").to_i)
+    end
+
+    def test_cache_resave_move_to
+      cat = Cat.create(:bio => File.new(File.join(TEST_ROOT, "fixtures/hello.txt")), :legacy_code => "1nval1d!")
+      refute(cat.valid?)
+      assert_equal(0, Cat.count)
+      assert_equal(1, Cat.connection.select_value("SELECT COUNT(*) FROM carrierwave_files").to_i)
+      assert_equal(1, Cat.connection.select_value("SELECT COUNT(*) FROM pg_largeobject").to_i)
+
+      cat.legacy_code = "abc"
+      assert(cat.valid?)
+      cat.save!
+      assert_equal(1, Cat.count)
+      assert_equal(1, Cat.connection.select_value("SELECT COUNT(*) FROM carrierwave_files").to_i)
+      assert_equal(1, Cat.connection.select_value("SELECT COUNT(*) FROM pg_largeobject").to_i)
     end
 
     def test_clean_cache
@@ -103,5 +174,6 @@ class CarrierWave::PostgresqlTableTest < Minitest::Test
       assert_equal(0, User.connection.select_value("SELECT COUNT(*) FROM carrierwave_files").to_i)
       assert_equal(0, User.connection.select_value("SELECT COUNT(*) FROM pg_largeobject").to_i)
     end
+
   end
 end

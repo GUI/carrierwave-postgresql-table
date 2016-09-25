@@ -119,11 +119,12 @@ module CarrierWave
 
         def store(new_file)
           CarrierWaveFile.transaction do
+            connection = CarrierWaveFile.connection
+            raw_connection = connection.raw_connection
             oid = nil
             if(new_file.kind_of?(CarrierWave::Storage::PostgresqlTable::File))
               oid = new_file.copy_to(@path)
             else
-              raw_connection = CarrierWaveFile.connection.raw_connection
               file = new_file.to_file
 
               begin
@@ -142,10 +143,20 @@ module CarrierWave
             end
 
             begin
+              old_oid = @record.pg_largeobject_oid
               @record.pg_largeobject_oid = oid
               @record.size = new_file.size
               @record.content_type = new_file.content_type
               @record.save
+
+              # Cleanup old, unused largeobject OIDs if we're updating the
+              # record with a new OID reference.
+              if(old_oid && old_oid != oid)
+                old_references = connection.select_value("SELECT COUNT(*) FROM #{CarrierWaveFile.table_name} WHERE pg_largeobject_oid = #{CarrierWaveFile.sanitize(old_oid)}").to_i
+                if(old_references == 0)
+                  raw_connection.lo_unlink(old_oid)
+                end
+              end
             rescue ::ActiveRecord::RecordNotUnique
               @record = CarrierWaveFile.find_or_initialize_by(:path => @path)
               retry
@@ -174,7 +185,13 @@ module CarrierWave
         end
 
         def move_to(new_path)
-          @record.update_attribute(:path, new_path)
+          CarrierWaveFile.transaction do
+            # Remove any existing files at the current path.
+            CarrierWaveFile.delete_all_files("path = #{CarrierWaveFile.sanitize(new_path)} AND id != #{CarrierWaveFile.sanitize(@record.id)}")
+
+            # Change the current record's path to the new path.
+            @record.update_attribute(:path, new_path)
+          end
         end
 
         def delete
