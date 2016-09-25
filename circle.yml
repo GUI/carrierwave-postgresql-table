@@ -1,0 +1,8 @@
+dependencies:
+  post:
+    - bundle exec appraisal install
+test:
+  pre:
+    - psql -c "CREATE DATABASE carrierwave_postgresql_table_test;" -U postgres
+  override:
+    - bundle exec appraisal rake
