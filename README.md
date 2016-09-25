@@ -1,5 +1,7 @@
 # carrierwave-postgresql-table
 
+[![Circle CI](https://circleci.com/gh/GUI/carrierwave-postgresql-table.svg?style=svg)](https://circleci.com/gh/GUI/carrierwave-postgresql-table)
+
 A PostgreSQL storage adapter for [CarrierWave](https://github.com/carrierwaveuploader/carrierwave). Files are stored as PostgreSQL [large objects](https://www.postgresql.org/docs/current/static/largeobjects.html).
 
 This gem is similar to [carrierwave-postgresql](https://github.com/diogob/carrierwave-postgresql), but differs in how it stores file metadata. This gem uses an extra table to store additional file metadata, allowing it to support multiple CarrierWave [versions](https://github.com/carrierwaveuploader/carrierwave#adding-versions) on a single uploader.
