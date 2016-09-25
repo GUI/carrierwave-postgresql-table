@@ -1,0 +1,8 @@
+Description:
+Generates database migration for table to store list of uploads
+
+Example:
+    rails generate carrierwave_postgresql_table:migration
+
+    This will create:
+        db/migrate/<timestamp>_create_carrierwave_files.rb
