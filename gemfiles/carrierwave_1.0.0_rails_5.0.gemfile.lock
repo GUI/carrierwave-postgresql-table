@@ -1,7 +1,7 @@
 PATH
   remote: ../
   specs:
-    carrierwave-postgresql-table (0.1.0)
+    carrierwave-postgresql-table (0.1.2)
       activerecord
       carrierwave
       pg
@@ -134,4 +134,4 @@ DEPENDENCIES
   rake (~> 10.0)
 
 BUNDLED WITH
-   1.13.0
+   1.13.1
