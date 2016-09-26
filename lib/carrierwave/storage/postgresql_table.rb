@@ -71,7 +71,7 @@ module CarrierWave
                 data = raw_connection.lo_read(lo, length)
                 @read_pos = raw_connection.lo_tell(lo)
               else
-                data = raw_connection.lo_read(lo, size)
+                data = raw_connection.lo_read(lo, self.size)
               end
             ensure
               raw_connection.lo_close(lo) if(lo)
@@ -88,6 +88,7 @@ module CarrierWave
         def to_tempfile
           Tempfile.new(:binmode => true).tap do |tempfile|
             IO.copy_stream(self, tempfile)
+            self.rewind
             tempfile.rewind
             tempfile.fsync
           end
@@ -102,7 +103,15 @@ module CarrierWave
         end
 
         def size
-          @record.size
+          @size = @record.size || fetch_size
+        end
+
+        def eof?
+          @read_pos == self.size
+        end
+
+        def rewind
+          @read_pos = 0
         end
 
         def content_type
@@ -123,23 +132,23 @@ module CarrierWave
             raw_connection = connection.raw_connection
             oid = nil
             if(new_file.kind_of?(CarrierWave::Storage::PostgresqlTable::File))
-              oid = new_file.copy_to(@path)
+              file = new_file
             else
               file = new_file.to_file
+            end
 
-              begin
-                oid = @record.pg_largeobject_oid || raw_connection.lo_creat
-                handle = raw_connection.lo_open(oid, PG::INV_WRITE)
-                raw_connection.lo_truncate(handle, 0)
-                buffer = ""
-                until file.eof?
-                  file.read(READ_CHUNK_SIZE, buffer)
-                  raw_connection.lo_write(handle, buffer)
-                end
-                file.close
-              ensure
-                raw_connection.lo_close(handle)
+            begin
+              oid = @record.pg_largeobject_oid || raw_connection.lo_creat
+              handle = raw_connection.lo_open(oid, PG::INV_WRITE)
+              raw_connection.lo_truncate(handle, 0)
+              buffer = ""
+              until file.eof?
+                file.read(READ_CHUNK_SIZE, buffer)
+                raw_connection.lo_write(handle, buffer)
               end
+              file.rewind
+            ensure
+              raw_connection.lo_close(handle)
             end
 
             begin
@@ -164,26 +173,6 @@ module CarrierWave
           end
         end
 
-        def copy_to(new_path)
-          CarrierWaveFile.transaction do
-            connection = CarrierWaveFile.connection
-
-            result = connection.execute("INSERT INTO pg_largeobject_metadata(lomowner, lomacl)
-              SELECT lomowner, lomacl
-              FROM pg_largeobject_metadata
-              WHERE oid = #{CarrierWaveFile.sanitize(@record.pg_largeobject_oid)}
-              RETURNING oid AS new_oid")
-            new_oid = Integer(result.values[0][0])
-
-            connection.execute("INSERT INTO pg_largeobject(loid, pageno, data)
-              SELECT #{new_oid}, pageno, data
-              FROM pg_largeobject
-              WHERE loid = #{CarrierWaveFile.sanitize(@record.pg_largeobject_oid)}")
-
-            new_oid
-          end
-        end
-
         def move_to(new_path)
           CarrierWaveFile.transaction do
             # Remove any existing files at the current path.
@@ -196,6 +185,19 @@ module CarrierWave
 
         def delete
           CarrierWaveFile.delete_all_files("id = #{CarrierWaveFile.sanitize(@record.id)}")
+        end
+
+        private
+
+        def fetch_size
+          size = nil
+          CarrierWaveFile.transaction do
+            raw_connection = CarrierWaveFile.connection.raw_connection
+            lo = raw_connection.lo_open(@record.pg_largeobject_oid)
+            size = raw_connection.lo_lseek(lo, 0, PG::SEEK_END)
+          end
+
+          size
         end
       end
     end

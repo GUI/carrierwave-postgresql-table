@@ -29,7 +29,7 @@ class CarrierWave::PostgresqlTableTest < Minitest::Test
 
     assert_equal(1, User.count)
     assert_equal(1, User.connection.select_value("SELECT COUNT(*) FROM carrierwave_files").to_i)
-    assert_equal(1, User.connection.select_value("SELECT COUNT(*) FROM pg_largeobject").to_i)
+    assert_equal(1, User.connection.select_value("SELECT COUNT(DISTINCT oid) FROM pg_largeobject_metadata").to_i)
   end
 
   def test_upload_with_version
@@ -39,7 +39,7 @@ class CarrierWave::PostgresqlTableTest < Minitest::Test
 
     assert_equal(1, Animal.count)
     assert_equal(2, Animal.connection.select_value("SELECT COUNT(*) FROM carrierwave_files").to_i)
-    assert_equal(2, Animal.connection.select_value("SELECT COUNT(*) FROM pg_largeobject").to_i)
+    assert_equal(2, Animal.connection.select_value("SELECT COUNT(DISTINCT oid) FROM pg_largeobject_metadata").to_i)
   end
 
   def test_copy
@@ -50,7 +50,7 @@ class CarrierWave::PostgresqlTableTest < Minitest::Test
 
     assert_equal(2, User.count)
     assert_equal(2, User.connection.select_value("SELECT COUNT(*) FROM carrierwave_files").to_i)
-    assert_equal(2, User.connection.select_value("SELECT COUNT(*) FROM pg_largeobject").to_i)
+    assert_equal(2, User.connection.select_value("SELECT COUNT(DISTINCT oid) FROM pg_largeobject_metadata").to_i)
   end
 
   def test_copy_with_version
@@ -61,7 +61,7 @@ class CarrierWave::PostgresqlTableTest < Minitest::Test
 
     assert_equal(2, Animal.count)
     assert_equal(4, Animal.connection.select_value("SELECT COUNT(*) FROM carrierwave_files").to_i)
-    assert_equal(4, Animal.connection.select_value("SELECT COUNT(*) FROM pg_largeobject").to_i)
+    assert_equal(4, Animal.connection.select_value("SELECT COUNT(DISTINCT oid) FROM pg_largeobject_metadata").to_i)
   end
 
   def test_file_size
@@ -81,7 +81,7 @@ class CarrierWave::PostgresqlTableTest < Minitest::Test
 
     assert_equal(1, User.count)
     assert_equal(1, User.connection.select_value("SELECT COUNT(*) FROM carrierwave_files").to_i)
-    assert_equal(1, User.connection.select_value("SELECT COUNT(*) FROM pg_largeobject").to_i)
+    assert_equal(1, User.connection.select_value("SELECT COUNT(DISTINCT oid) FROM pg_largeobject_metadata").to_i)
 
     user = User.find(user.id)
     user.bio = File.new(File.join(TEST_ROOT, "fixtures/alternate/hello.txt"))
@@ -91,7 +91,7 @@ class CarrierWave::PostgresqlTableTest < Minitest::Test
 
     assert_equal(1, User.count)
     assert_equal(1, User.connection.select_value("SELECT COUNT(*) FROM carrierwave_files").to_i)
-    assert_equal(1, User.connection.select_value("SELECT COUNT(*) FROM pg_largeobject").to_i)
+    assert_equal(1, User.connection.select_value("SELECT COUNT(DISTINCT oid) FROM pg_largeobject_metadata").to_i)
   end
 
   def test_update_move_to
@@ -102,7 +102,7 @@ class CarrierWave::PostgresqlTableTest < Minitest::Test
 
     assert_equal(1, Cat.count)
     assert_equal(1, Cat.connection.select_value("SELECT COUNT(*) FROM carrierwave_files").to_i)
-    assert_equal(1, Cat.connection.select_value("SELECT COUNT(*) FROM pg_largeobject").to_i)
+    assert_equal(1, Cat.connection.select_value("SELECT COUNT(DISTINCT oid) FROM pg_largeobject_metadata").to_i)
 
     cat = Cat.find(cat.id)
     cat.bio = File.new(File.join(TEST_ROOT, "fixtures/alternate/hello.txt"))
@@ -112,7 +112,7 @@ class CarrierWave::PostgresqlTableTest < Minitest::Test
 
     assert_equal(1, Cat.count)
     assert_equal(1, Cat.connection.select_value("SELECT COUNT(*) FROM carrierwave_files").to_i)
-    assert_equal(1, Cat.connection.select_value("SELECT COUNT(*) FROM pg_largeobject").to_i)
+    assert_equal(1, Cat.connection.select_value("SELECT COUNT(DISTINCT oid) FROM pg_largeobject_metadata").to_i)
   end
 
   if(CarrierWave::VERSION.to_f >= 1.0)
@@ -121,7 +121,7 @@ class CarrierWave::PostgresqlTableTest < Minitest::Test
       assert(user.errors)
       assert_equal(0, User.count)
       assert_equal(1, User.connection.select_value("SELECT COUNT(*) FROM carrierwave_files").to_i)
-      assert_equal(1, User.connection.select_value("SELECT COUNT(*) FROM pg_largeobject").to_i)
+      assert_equal(1, User.connection.select_value("SELECT COUNT(DISTINCT oid) FROM pg_largeobject_metadata").to_i)
     end
 
     def test_cache_resave
@@ -129,14 +129,14 @@ class CarrierWave::PostgresqlTableTest < Minitest::Test
       refute(user.valid?)
       assert_equal(0, User.count)
       assert_equal(1, User.connection.select_value("SELECT COUNT(*) FROM carrierwave_files").to_i)
-      assert_equal(1, User.connection.select_value("SELECT COUNT(*) FROM pg_largeobject").to_i)
+      assert_equal(1, User.connection.select_value("SELECT COUNT(DISTINCT oid) FROM pg_largeobject_metadata").to_i)
 
       user.legacy_code = "abc"
       assert(user.valid?)
       user.save!
       assert_equal(1, User.count)
       assert_equal(1, User.connection.select_value("SELECT COUNT(*) FROM carrierwave_files").to_i)
-      assert_equal(1, User.connection.select_value("SELECT COUNT(*) FROM pg_largeobject").to_i)
+      assert_equal(1, User.connection.select_value("SELECT COUNT(DISTINCT oid) FROM pg_largeobject_metadata").to_i)
     end
 
     def test_cache_resave_move_to
@@ -144,14 +144,14 @@ class CarrierWave::PostgresqlTableTest < Minitest::Test
       refute(cat.valid?)
       assert_equal(0, Cat.count)
       assert_equal(1, Cat.connection.select_value("SELECT COUNT(*) FROM carrierwave_files").to_i)
-      assert_equal(1, Cat.connection.select_value("SELECT COUNT(*) FROM pg_largeobject").to_i)
+      assert_equal(1, Cat.connection.select_value("SELECT COUNT(DISTINCT oid) FROM pg_largeobject_metadata").to_i)
 
       cat.legacy_code = "abc"
       assert(cat.valid?)
       cat.save!
       assert_equal(1, Cat.count)
       assert_equal(1, Cat.connection.select_value("SELECT COUNT(*) FROM carrierwave_files").to_i)
-      assert_equal(1, Cat.connection.select_value("SELECT COUNT(*) FROM pg_largeobject").to_i)
+      assert_equal(1, Cat.connection.select_value("SELECT COUNT(DISTINCT oid) FROM pg_largeobject_metadata").to_i)
     end
 
     def test_clean_cache
@@ -159,21 +159,20 @@ class CarrierWave::PostgresqlTableTest < Minitest::Test
       assert(user.errors)
       assert_equal(0, User.count)
       assert_equal(1, User.connection.select_value("SELECT COUNT(*) FROM carrierwave_files").to_i)
-      assert_equal(1, User.connection.select_value("SELECT COUNT(*) FROM pg_largeobject").to_i)
+      assert_equal(1, User.connection.select_value("SELECT COUNT(DISTINCT oid) FROM pg_largeobject_metadata").to_i)
 
       file = CarrierWave::Storage::PostgresqlTable::CarrierWaveFile.first
       file.update_column(:updated_at, Time.now.utc - 40)
       CarrierWave.clean_cached_files!(60)
 
       assert_equal(1, User.connection.select_value("SELECT COUNT(*) FROM carrierwave_files").to_i)
-      assert_equal(1, User.connection.select_value("SELECT COUNT(*) FROM pg_largeobject").to_i)
+      assert_equal(1, User.connection.select_value("SELECT COUNT(DISTINCT oid) FROM pg_largeobject_metadata").to_i)
 
       file.update_column(:updated_at, Time.now.utc - 80)
       CarrierWave.clean_cached_files!(60)
 
       assert_equal(0, User.connection.select_value("SELECT COUNT(*) FROM carrierwave_files").to_i)
-      assert_equal(0, User.connection.select_value("SELECT COUNT(*) FROM pg_largeobject").to_i)
+      assert_equal(0, User.connection.select_value("SELECT COUNT(DISTINCT oid) FROM pg_largeobject_metadata").to_i)
     end
-
   end
 end

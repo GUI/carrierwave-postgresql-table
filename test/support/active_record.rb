@@ -1,7 +1,7 @@
 ActiveRecord::Base.establish_connection({
   :adapter => "postgresql",
   :database => "carrierwave_postgresql_table_test",
-  :username => "postgres",
+  :username => "carrierwave_postgresql_table_test",
   :host => "localhost",
 })
 
@@ -37,4 +37,4 @@ DatabaseCleaner.strategy = :transaction
 DatabaseCleaner.clean_with(:truncation)
 
 # Delete all the pg_largeobjects in addition to truncating the normal tables.
-ActiveRecord::Base.connection.execute("SELECT lo_unlink(loid) FROM (SELECT DISTINCT loid FROM pg_largeobject) AS oids")
+ActiveRecord::Base.connection.execute("SELECT lo_unlink(oid) FROM (SELECT DISTINCT oid FROM pg_largeobject_metadata) AS oids")

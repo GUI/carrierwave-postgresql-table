@@ -5,7 +5,8 @@ dependencies:
     - bundle exec appraisal install
 database:
   override:
-    - psql -c "CREATE DATABASE carrierwave_postgresql_table_test;" -U postgres
+    - psql -c "CREATE USER carrierwave_postgresql_table_test WITH PASSWORD '';" -U postgres
+    - psql -c "CREATE DATABASE carrierwave_postgresql_table_test OWNER carrierwave_postgresql_table_test;" -U postgres
 test:
   override:
     - bundle exec appraisal rake
