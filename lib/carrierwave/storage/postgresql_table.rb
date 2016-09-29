@@ -33,7 +33,7 @@ module CarrierWave
 
       def clean_cache!(seconds)
         time = Time.now - seconds.seconds
-        CarrierWaveFile.delete_all_files("updated_at < #{CarrierWaveFile.sanitize(time)}")
+        CarrierWaveFile.delete_all_files("path LIKE #{CarrierWaveFile.sanitize(::File.join(uploader.cache_dir, "%"))} AND updated_at < #{CarrierWaveFile.sanitize(time)}")
       end
 
       class CarrierWaveFile < ::ActiveRecord::Base

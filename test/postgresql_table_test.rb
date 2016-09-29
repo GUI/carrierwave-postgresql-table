@@ -174,5 +174,25 @@ class CarrierWave::PostgresqlTableTest < Minitest::Test
       assert_equal(0, User.connection.select_value("SELECT COUNT(*) FROM carrierwave_files").to_i)
       assert_equal(0, User.connection.select_value("SELECT COUNT(DISTINCT oid) FROM pg_largeobject_metadata").to_i)
     end
+
+    def test_clean_cache_does_not_delete_uncached_files
+      user = User.create(:bio => File.new(File.join(TEST_ROOT, "fixtures/hello.txt")))
+      assert_equal(1, User.count)
+      assert_equal(1, User.connection.select_value("SELECT COUNT(*) FROM carrierwave_files").to_i)
+      assert_equal(1, User.connection.select_value("SELECT COUNT(DISTINCT oid) FROM pg_largeobject_metadata").to_i)
+
+      file = CarrierWave::Storage::PostgresqlTable::CarrierWaveFile.first
+      file.update_column(:updated_at, Time.now.utc - 40)
+      CarrierWave.clean_cached_files!(60)
+
+      assert_equal(1, User.connection.select_value("SELECT COUNT(*) FROM carrierwave_files").to_i)
+      assert_equal(1, User.connection.select_value("SELECT COUNT(DISTINCT oid) FROM pg_largeobject_metadata").to_i)
+
+      file.update_column(:updated_at, Time.now.utc - 80)
+      CarrierWave.clean_cached_files!(60)
+
+      assert_equal(1, User.connection.select_value("SELECT COUNT(*) FROM carrierwave_files").to_i)
+      assert_equal(1, User.connection.select_value("SELECT COUNT(DISTINCT oid) FROM pg_largeobject_metadata").to_i)
+    end
   end
 end
