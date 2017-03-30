@@ -6,7 +6,7 @@ module CarrierWave
       def call(env)
         request = Rack::Request.new(env)
 
-        file = CarrierWave::Storage::PostgresqlTable::File.new(request.path.sub(/^\//, ""))
+        file = CarrierWave::Storage::PostgresqlTable::File.new(request.path.sub(/^#{ENV["RAILS_RELATIVE_URL_ROOT"]}\//, ""))
 
         headers = {
           "Last-Modified" => file.last_modified.httpdate,
