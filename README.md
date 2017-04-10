@@ -19,7 +19,7 @@ gem "carrierwave-postgresql-table"
 carrierwave-postgresql-table is tested against the following versions of CarrierWave and Rails:
 
 - CarrierWave 0.11
-- CarrierWave 1.0 (beta)
+- CarrierWave 1.0
 - Rails 4.2
 - Rails 5.0
 

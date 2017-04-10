@@ -6,6 +6,9 @@
 - Fix the Rack application when running with Rails under a relative URL root.
 - Fix the Rack application to return 404 not found responses for unknown files.
 
+### Changed
+- Test against final, released version of CarrierWave 1.0.0.
+
 ## [0.1.3] - 2016-09-28
 
 ### Fixed
