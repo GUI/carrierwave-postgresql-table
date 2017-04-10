@@ -75,4 +75,11 @@ class RackAppTest < Minitest::Test
     ENV["RAILS_RELATIVE_URL_ROOT"] = nil
     Rails.application = nil
   end
+
+  def test_not_found
+    get "/uploads/foo/hello.txt"
+    assert_equal(404, last_response.status)
+    assert_equal("text/plain", last_response.headers["Content-Type"])
+    assert_equal("Not Found", last_response.body)
+  end
 end

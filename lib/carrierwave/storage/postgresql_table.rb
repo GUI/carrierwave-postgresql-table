@@ -171,6 +171,10 @@ module CarrierWave
               retry
             end
           end
+
+          def exists?
+            @record && @record.persisted?
+          end
         end
 
         def move_to(new_path)

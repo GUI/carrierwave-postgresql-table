@@ -13,6 +13,10 @@ module CarrierWave
         path = request.path.sub(/^#{Regexp.escape(strip_prefix)}/, "")
         file = CarrierWave::Storage::PostgresqlTable::File.new(path)
 
+        unless(file.exists?)
+          return [404, { "Content-Type" => "text/plain" }, "Not Found"]
+        end
+
         headers = {
           "Last-Modified" => file.last_modified.httpdate,
           "Content-Type" => file.content_type,
