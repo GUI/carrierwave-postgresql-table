@@ -14,7 +14,7 @@ module CarrierWave
         file = CarrierWave::Storage::PostgresqlTable::File.new(path)
 
         unless(file.exists?)
-          return [404, { "Content-Type" => "text/plain" }, "Not Found"]
+          return [404, { "Content-Type" => "text/plain" }, ["Not Found"]]
         end
 
         headers = {
