@@ -1,5 +1,10 @@
 # Change Log
 
+## [1.0.2] - 2017-04-26
+
+### Fixed
+- Another fix for 404 handling in the Rack application. Thanks to [@bauersman](https://github.com/bauersman) for the fix.
+
 ## [1.0.1] - 2017-04-26
 
 ### Fixed
