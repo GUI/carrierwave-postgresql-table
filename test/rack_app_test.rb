@@ -13,7 +13,7 @@ class RackAppTest < Minitest::Test
   end
 
   def app
-    CarrierWave::PostgresqlTable::RackApp.new
+    Rack::Lint.new(CarrierWave::PostgresqlTable::RackApp.new)
   end
 
   def test_returns_file
