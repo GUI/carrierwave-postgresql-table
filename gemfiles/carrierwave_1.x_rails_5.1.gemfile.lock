@@ -1,7 +1,7 @@
 PATH
   remote: ..
   specs:
-    carrierwave-postgresql-table (1.0.2)
+    carrierwave-postgresql-table (1.1.0)
       activerecord
       carrierwave
       pg

@@ -1,5 +1,13 @@
 # Change Log
 
+## [1.1.0] - 2018-11-22
+
+### Fixed
+- Compatibility with Rails 5.1 and 5.2
+
+### Changed
+- Drop Ruby 1.9 compatibility.
+
 ## [1.0.2] - 2017-04-26
 
 ### Fixed
