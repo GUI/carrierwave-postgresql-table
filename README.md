@@ -16,12 +16,11 @@ gem "carrierwave-postgresql-table"
 
 ## Compatibility
 
-carrierwave-postgresql-table is tested against the following versions of CarrierWave and Rails:
+carrierwave-postgresql-table is tested against the following versions of CarrierWave, Rails, and Ruby:
 
-- CarrierWave 0.11
-- CarrierWave 1.0
-- Rails 4.2
-- Rails 5.0
+- CarrierWave 0.11, 1.0, 1.1, 1.2
+- Rails 4.2, 5.0, 5.1, 5.2
+- Ruby 2.2, 2.3, 2.4, 2.5
 
 ## Usage
 
