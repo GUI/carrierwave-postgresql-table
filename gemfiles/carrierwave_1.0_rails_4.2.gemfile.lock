@@ -137,7 +137,7 @@ PLATFORMS
 
 DEPENDENCIES
   appraisal (~> 2.2.0)
-  bundler (~> 1.17)
+  bundler (>= 1.0)
   carrierwave (~> 1.0.0)
   carrierwave-postgresql-table!
   database_cleaner (~> 1.7.0)
