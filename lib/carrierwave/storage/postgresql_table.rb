@@ -33,7 +33,7 @@ module CarrierWave
 
       def clean_cache!(seconds)
         time = Time.now - seconds.seconds
-        CarrierWaveFile.delete_all_files("path LIKE #{CarrierWaveFile.sanitize(::File.join(uploader.cache_dir, "%"))} AND updated_at < #{CarrierWaveFile.sanitize(time)}")
+        CarrierWaveFile.delete_all_files("path LIKE #{CarrierWaveFile.connection.quote(::File.join(uploader.cache_dir, "%"))} AND updated_at < #{CarrierWaveFile.connection.quote(time)}")
       end
 
       class CarrierWaveFile < ::ActiveRecord::Base
@@ -161,7 +161,7 @@ module CarrierWave
               # Cleanup old, unused largeobject OIDs if we're updating the
               # record with a new OID reference.
               if(old_oid && old_oid != oid)
-                old_references = connection.select_value("SELECT COUNT(*) FROM #{CarrierWaveFile.table_name} WHERE pg_largeobject_oid = #{CarrierWaveFile.sanitize(old_oid)}").to_i
+                old_references = connection.select_value("SELECT COUNT(*) FROM #{CarrierWaveFile.table_name} WHERE pg_largeobject_oid = #{CarrierWaveFile.connection.quote(old_oid)}").to_i
                 if(old_references == 0)
                   raw_connection.lo_unlink(old_oid)
                 end
@@ -180,7 +180,7 @@ module CarrierWave
         def move_to(new_path)
           CarrierWaveFile.transaction do
             # Remove any existing files at the current path.
-            CarrierWaveFile.delete_all_files("path = #{CarrierWaveFile.sanitize(new_path)} AND id != #{CarrierWaveFile.sanitize(@record.id)}")
+            CarrierWaveFile.delete_all_files("path = #{CarrierWaveFile.connection.quote(new_path)} AND id != #{CarrierWaveFile.connection.quote(@record.id)}")
 
             # Change the current record's path to the new path.
             @record.update_attribute(:path, new_path)
@@ -188,7 +188,7 @@ module CarrierWave
         end
 
         def delete
-          CarrierWaveFile.delete_all_files("id = #{CarrierWaveFile.sanitize(@record.id)}")
+          CarrierWaveFile.delete_all_files("id = #{CarrierWaveFile.connection.quote(@record.id)}")
         end
 
         private
