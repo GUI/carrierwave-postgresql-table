@@ -1,0 +1,85 @@
+version: 2
+references:
+  bundle_install: &bundle_install
+    run:
+      name: Install Bundler dependencies
+      command: bundle check || bundle install --jobs=15 --retry=3
+  appraisal_install: &appraisal_install
+    run:
+      name: Install Appraisal dependencies
+      command: bundle exec appraisal install --jobs 15
+  wait_for_db: &wait_for_db
+    run:
+      name: Wait for DB
+      command: dockerize -wait tcp://localhost:5432 -timeout 1m
+  appraisal_test: &appraisal_test
+    run:
+      name: Run unit tests
+      command: bundle exec appraisal rake test
+jobs:
+  lint:
+    docker:
+      - image: circleci/ruby:2.5
+    steps:
+      - checkout
+      - <<: *bundle_install
+      - run:
+          name: Run RuboCop linting
+          command: bundle exec rake rubocop
+  "ruby-2.2":
+    docker:
+      - image: circleci/ruby:2.2
+      - image: circleci/postgres:9.3
+    steps:
+      - checkout
+      - <<: *bundle_install
+      - <<: *appraisal_install
+      - <<: *wait_for_db
+      - <<: *appraisal_test
+  "ruby-2.3":
+    docker:
+      - image: circleci/ruby:2.3
+      - image: circleci/postgres:9.6
+    steps:
+      - checkout
+      - <<: *bundle_install
+      - <<: *appraisal_install
+      - <<: *wait_for_db
+      - <<: *appraisal_test
+  "ruby-2.4":
+    docker:
+      - image: circleci/ruby:2.4
+      - image: circleci/postgres:10
+    steps:
+      - checkout
+      - <<: *bundle_install
+      - <<: *appraisal_install
+      - <<: *wait_for_db
+      - <<: *appraisal_test
+  "ruby-2.5":
+    docker:
+      - image: circleci/ruby:2.5
+      - image: circleci/postgres:11
+    steps:
+      - checkout
+      - <<: *bundle_install
+      - <<: *appraisal_install
+      - <<: *wait_for_db
+      - <<: *appraisal_test
+workflows:
+  version: 2
+  build:
+    jobs:
+      - lint
+      - "ruby-2.2":
+          requires:
+            - lint
+      - "ruby-2.3":
+          requires:
+            - lint
+      - "ruby-2.4":
+          requires:
+            - lint
+      - "ruby-2.5":
+          requires:
+            - lint

@@ -2,6 +2,19 @@
 
 ActiveRecord::Base.establish_connection({
   :adapter => "postgresql",
+  :username => ENV["PGUSER"] || "postgres",
+  :host => ENV["PGHOST"] || "localhost",
+})
+
+# Run tests as a non-superuser role, since there are some permissions
+# differences between normal users and superusers for the large object tables
+# (only superusers can query pg_largeobject).
+ActiveRecord::Base.connection.execute("DROP DATABASE IF EXISTS carrierwave_postgresql_table_test")
+ActiveRecord::Base.connection.execute("DROP USER IF EXISTS carrierwave_postgresql_table_test")
+ActiveRecord::Base.connection.execute("CREATE USER carrierwave_postgresql_table_test WITH PASSWORD ''")
+ActiveRecord::Base.connection.execute("CREATE DATABASE carrierwave_postgresql_table_test OWNER carrierwave_postgresql_table_test")
+ActiveRecord::Base.establish_connection({
+  :adapter => "postgresql",
   :database => "carrierwave_postgresql_table_test",
   :username => "carrierwave_postgresql_table_test",
   :host => "localhost",
