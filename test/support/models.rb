@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class UserBioUploader < CarrierWave::Uploader::Base
   def store_dir
     "uploads/#{model.class.to_s.underscore}/#{mounted_as}/#{model.id}"
@@ -16,7 +18,7 @@ class AnimalBioUploader < CarrierWave::Uploader::Base
   private
 
   def strip_text
-    cache_stored_file! if !cached?
+    cache_stored_file! unless cached?
     data = File.read(current_path).strip
     File.open(current_path, "wb") { |f| f.write(data) }
   end

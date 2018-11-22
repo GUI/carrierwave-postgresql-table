@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "test_helper"
 
 class CarrierWave::PostgresqlTableTest < Minitest::Test
@@ -115,7 +117,7 @@ class CarrierWave::PostgresqlTableTest < Minitest::Test
     assert_equal(1, Cat.connection.select_value("SELECT COUNT(DISTINCT oid) FROM pg_largeobject_metadata").to_i)
   end
 
-  if(CarrierWave::VERSION.to_f >= 1.0)
+  if (CarrierWave::VERSION.to_f >= 1.0)
     def test_cache
       user = User.create(:bio => File.new(File.join(TEST_ROOT, "fixtures/hello.txt")), :legacy_code => "1nval1d!")
       assert(user.errors)
@@ -176,7 +178,7 @@ class CarrierWave::PostgresqlTableTest < Minitest::Test
     end
 
     def test_clean_cache_does_not_delete_uncached_files
-      user = User.create(:bio => File.new(File.join(TEST_ROOT, "fixtures/hello.txt")))
+      User.create(:bio => File.new(File.join(TEST_ROOT, "fixtures/hello.txt")))
       assert_equal(1, User.count)
       assert_equal(1, User.connection.select_value("SELECT COUNT(*) FROM carrierwave_files").to_i)
       assert_equal(1, User.connection.select_value("SELECT COUNT(DISTINCT oid) FROM pg_largeobject_metadata").to_i)

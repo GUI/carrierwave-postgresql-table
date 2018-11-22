@@ -1,8 +1,10 @@
+# frozen_string_literal: true
+
 module CarrierWave
   module Storage
     class PostgresqlTable < Abstract
       def store!(file)
-        if(uploader.move_to_store && file.kind_of?(CarrierWave::Storage::PostgresqlTable::File))
+        if (uploader.move_to_store && file.kind_of?(CarrierWave::Storage::PostgresqlTable::File))
           file.move_to(uploader.store_path)
           file
         else
@@ -48,8 +50,8 @@ module CarrierWave
       end
 
       class File
-        READ_CHUNK_SIZE = 16384
-        STREAM_CHUNK_SIZE = 16384
+        READ_CHUNK_SIZE = 16_384
+        STREAM_CHUNK_SIZE = 16_384
 
         attr_reader :path
 
@@ -66,7 +68,7 @@ module CarrierWave
 
             begin
               lo = raw_connection.lo_open(@record.pg_largeobject_oid)
-              if(length)
+              if length
                 raw_connection.lo_lseek(lo, @read_pos, PG::SEEK_SET)
                 data = raw_connection.lo_read(lo, length)
                 @read_pos = raw_connection.lo_tell(lo)
@@ -74,11 +76,11 @@ module CarrierWave
                 data = raw_connection.lo_read(lo, self.size)
               end
             ensure
-              raw_connection.lo_close(lo) if(lo)
+              raw_connection.lo_close(lo) if lo
             end
           end
 
-          if(buffer && data)
+          if (buffer && data)
             buffer.replace(data)
           end
 
@@ -122,7 +124,7 @@ module CarrierWave
           @record.update_attribute(:content_type, new_content_type)
         end
 
-        def url(options = {})
+        def url(_options = {})
           ::File.join("/", @path)
         end
 
@@ -131,7 +133,7 @@ module CarrierWave
             connection = CarrierWaveFile.connection
             raw_connection = connection.raw_connection
             oid = nil
-            if(new_file.kind_of?(CarrierWave::Storage::PostgresqlTable::File))
+            if new_file.kind_of?(CarrierWave::Storage::PostgresqlTable::File)
               file = new_file
             else
               file = new_file.to_file
@@ -141,7 +143,7 @@ module CarrierWave
               oid = @record.pg_largeobject_oid || raw_connection.lo_creat
               handle = raw_connection.lo_open(oid, PG::INV_WRITE)
               raw_connection.lo_truncate(handle, 0)
-              buffer = ""
+              buffer = String.new # rubocop:disable Style/EmptyLiteral
               until file.eof?
                 file.read(READ_CHUNK_SIZE, buffer)
                 raw_connection.lo_write(handle, buffer)
@@ -160,9 +162,9 @@ module CarrierWave
 
               # Cleanup old, unused largeobject OIDs if we're updating the
               # record with a new OID reference.
-              if(old_oid && old_oid != oid)
+              if (old_oid && old_oid != oid)
                 old_references = connection.select_value("SELECT COUNT(*) FROM #{CarrierWaveFile.table_name} WHERE pg_largeobject_oid = #{CarrierWaveFile.connection.quote(old_oid)}").to_i
-                if(old_references == 0)
+                if (old_references == 0)
                   raw_connection.lo_unlink(old_oid)
                 end
               end

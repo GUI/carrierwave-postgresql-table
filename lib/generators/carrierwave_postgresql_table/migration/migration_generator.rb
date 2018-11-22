@@ -1,11 +1,13 @@
+# frozen_string_literal: true
+
 require "rails/generators/active_record"
 
 module CarrierwavePostgresqlTable
   class MigrationGenerator < Rails::Generators::Base
     include Rails::Generators::Migration
-    source_root(File.expand_path("../templates", __FILE__))
+    source_root(File.expand_path("templates", __dir__))
 
-    def self.next_migration_number(dirname)
+    def self.next_migration_number(_dirname)
       Time.now.utc.strftime("%Y%m%d%H%M%S")
     end
 

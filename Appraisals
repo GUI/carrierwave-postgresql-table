@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 appraise "carrierwave-0.11-rails-4.2" do
   gem "carrierwave", "~> 0.11.2"
   gem "rails", "~> 4.2.7"
